@@ -1,5 +1,6 @@
 class Employees:
     employees = []
+    employee_count = 0
     departments = {}
     department_count = 0
 
@@ -8,13 +9,15 @@ class Employees:
         self.department_id = department_id
         self.id = Employees.employee_id_generator()
         Employees.employees.append(self)
+        Employees.employee_count+=1
 
     def __del__(self):
         Employees.employees.remove(self)
+        Employees.employee_count-=1
 
     @staticmethod
     def employee_id_generator():
-        employee_amount=len(Employees.employees)
+        employee_amount=Employees.employee_count
         if employee_amount == 0:
             result = 1
         else:
@@ -50,7 +53,7 @@ class Employees:
                   f"Name: {Employees.departments[i]}\n")
 
         print("Employees:\n"
-              f"Amount: {len(Employees.employees)}")
+              f"Amount: {Employees.employee_count}")
         for i in Employees.employees:
             print(f"Id: {i.id}\n"
                   f"Name: {i.name}")
