@@ -12,7 +12,6 @@ class Employees:
         Employees.employee_count+=1
 
     def __del__(self):
-        Employees.employees.remove(self)
         Employees.employee_count-=1
 
     @staticmethod
