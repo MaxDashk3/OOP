@@ -16,14 +16,17 @@ class Phone:
 
     def call(self, Phone):
         if self.turned_on:
-            print(f"{self.name} is calling {Phone.name}")
-            Phone.receive_call(self.name)
+            if Phone == self:
+                print("You just tried to call yourself")
+            else:
+                print(f"{self.name} is calling {Phone.name}")
+                Phone.receive_call(self.name)
         else:
             print(f'{self.name} is turned off')
 
     def receive_call(self, name):
         if self.turned_on:
-            print(f"Getting a call from {name}")
+            print(f"{self.name} is getting a call from {name}")
         else:
             print(f'{self.name} is turned off')
 
@@ -96,7 +99,7 @@ class Smartphone(Phone):
 
     def show_info(self):
         super().show_info()
-        print("Internet connection:", "On" if self.internet_connection else "Off")
+        print("Internet connection:", ("On" if self.internet_connection else "Off"))
         print("Installed apps:", self.installed_apps)
         print(f"Smartphone")
 
@@ -110,5 +113,7 @@ class FoldablePhone(Smartphone):
 
     def show_info(self):
         Phone.show_info(self)
+        print("Internet connection:", ("On" if self.internet_connection else "Off"))
+        print("Installed apps:", self.installed_apps)
         print(f"Fold direction: {self.fold_direction}")
         print('Foldable phone')
