@@ -98,8 +98,14 @@ while True:
                 print("Invalid index")
         #deleting a phone
         case "del":
+            del_seq = []
             for i in range(len(args)):
-                phones.pop(int(args[i])-1)
+                ind = int(args[i])-1
+                if 0 <= ind < len(phones) and not ind in del_seq:
+                    del_seq.append(ind)
+            del_seq.sort(reverse=True)
+            for i in del_seq:
+                phones.pop(i)
         #clearing all
         case "clear":
             phones.clear()

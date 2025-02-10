@@ -14,13 +14,13 @@ class Phone:
         self.os = os
         self.turned_on = False
 
-    def call(self, Phone):
+    def call(self, phone):
         if self.turned_on:
-            if Phone == self:
+            if phone == self:
                 print("You just tried to call yourself")
             else:
-                print(f"{self.name} is calling {Phone.name}")
-                Phone.receive_call(self.name)
+                print(f"{self.name} is calling {phone.name}")
+                phone.receive_call(self.name)
         else:
             print(f'{self.name} is turned off')
 
