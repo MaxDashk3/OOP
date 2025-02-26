@@ -1,121 +1,121 @@
-import phone_classes as p
+from ATM import BasicATM, ProtectedATM, CreditCard, Collector, Bank
 
-phones=[]
-user_input=""
+card_list = [CreditCard(1020304910117658, 2025, 160043),
+             CreditCard(4039180945839820, 5324, 1123020)]
+collector_list = [Collector("Oppenheimer", [50,50,50,50,50]),
+         Collector("Maria", [150,200,300,430,220])]
+
+bank = Bank([BasicATM("NextLVL", [1, 2, 3, 4, 5]),
+             ProtectedATM("SafeBank24", [500,300,400,300,400]),
+             BasicATM("Bankbank.UA", [100, 200, 300, 203, 433])])
+
+bill_numbers = [1000, 500, 200, 100, 50]
+
 while True:
-    print("Stored phones:")
-    for i in range(len(phones)):
-        print(f"{i+1}. {phones[i].name}")
-    print("creating a phone: cr [type: bp (button phone), sp (smartphone), fp (foldable phone)]\n"
-          "selecting a phone: sl [phone index]\n"
-          "deleting phones: del [phone index1] [phone index2] ...\n"
-          "clear all: clear\n"
-          "add test phones: test\n"
-          "exit: exit")
-    user_input=input()
+    print("Available ATMs:")
+    index = 1
+    for i in bank:
+        print(f"{index}. {i.name}")
+        index += 1
+    print("Credit cards:")
+    index = 1
+    for i in card_list:
+        print(f"{index}. number: {i.get_number()}, pin {i.get_pin()}, money: {i.money}")
+        index += 1
+    print("Collectors:")
+    index = 1
+    for i in collector_list:
+        bills_string = ""
+        for a in range(len(bill_numbers)):
+            bills_string+=f"{str(i.bills[a])} for {bill_numbers[a]}, "
+        bills_string = bills_string[:-2]
+        print(f"{index}. {i.name}, bills: {bills_string}")
+        index += 1
+
+    print("Choose a command:\n"
+          f"add an object: add [batm, patm, card, coll]\n"
+          f"remove an object: rm [atm, card, coll] [index]\n"
+          f"withdraw money: wdraw [atm_index] [card_index]\n"
+          f"replenish money: repl [atm_index] [collector_index]\n"
+          f"view info about atms: inf\n"
+          f"set amount of bills for a collector: set [collector_index] [1000_uah_bills] [500_uah_bills] [200_uah_bills] [100_uah_bills] [50_uah_bills]\n"
+          f"clear all: clear\n"
+          f"exit: exit\n")
+    user_input = input()
     command = user_input.split()[0]
     args = user_input.split()[1:]
-
     match command:
-        #creating a phone
-        case "cr":
-            print("Enter following values: [battery capacity],[name],[os]", end='')
-            #adjusting a creation menu accordingly
+        case "add":
             match args[0]:
-                case "bp":
-                    print()
-                    user_input = input().split(',')
-                    phones.append(p.ButtonPhone(int(user_input[0]), user_input[1], user_input[2]))
-                case "sp":
-                    print()
-                    user_input = input().split(',')
-                    phones.append(p.Smartphone(int(user_input[0]), user_input[1], user_input[2]))
-                case "fp":
-                    print(",[fold direction]")
-                    user_input = input().split(',')
-                    phones.append(p.FoldablePhone(int(user_input[0]), user_input[1], user_input[2], user_input[3]))
-            print("Phone added successfully")
-
-
-        #selecting a phone for operations
-        case "sl":
-            if int(args[0])-1<=len(phones) and int(args[0])>0:
-                sel_phone = phones[int(args[0])-1]
-                while True:
-                    print(f"Selected phone: {sel_phone.name}")
-                    print("exit selected phone: exit\n"
-                          "press power switch: pow\n"
-                          "call another phone: call [phone index]\n"
-                          "show info: info")
-                    #adjusting menu according to phone type
-                    match type(sel_phone).__name__:
-                        case "ButtonPhone":
-                            print("press some buttons: btn")
-                        case "Smartphone" | "FoldablePhone":
-                            print("switch internet connection: int")
-                            print("install an app: install [app name]")
-                            print("delete an app: del [app name]")
-                            if isinstance(sel_phone, p.FoldablePhone):
-                                print("fold phone: fold")
-                    user_input = input()
-                    command = user_input.split()[0]
-                    args = user_input.split()[1:]
-                    match command:
-                        case "btn":
-                            if isinstance(sel_phone, p.ButtonPhone):
-                                sel_phone.press_some_buttons()
-                        case "pow":
-                            if sel_phone.turned_on:
-                                sel_phone.turn_off()
+                case "batm" | "patm":
+                    user_input = input("enter ATM name and amount of bills (optional): [name] [1000_uah_bills] [500_uah_bills] [200_uah_bills] [100_uah_bills] [50_uah_bills]\n")
+                    if len(user_input.split()) not in [1, 6]:
+                        raise ValueError("Incorrect number of arguments!")
+                    name = user_input.split()[0]
+                    bills = []
+                    for i in user_input.split()[1:]:
+                        bills.append(int(i))
+                    match args[0]:
+                        case "batm":
+                            if bills:
+                                bank.add(BasicATM(name, bills))
+                            else: bank.add(BasicATM(name))
+                        case "patm":
+                            if bills:
+                                bank.add(ProtectedATM(name, bills))
                             else:
-                                sel_phone.turn_on()
-                        case "call":
-                            if int(args[0])-1<=len(phones) and int(args[0])>0:
-                                sel_phone.call(phones[int(args[0])-1])
-                            else:
-                                print("Invalid index")
-                        case "exit":
-                            break
-                        case "info":
-                            sel_phone.show_info()
-                        case "int":
-                            if isinstance(sel_phone, p.Smartphone):
-                                if sel_phone.internet_connection:
-                                    sel_phone.disconnect_from_internet()
-                                else: sel_phone.connect_to_internet()
-                        case "install":
-                            if isinstance(sel_phone, p.Smartphone):
-                                sel_phone.download_app(args[0])
-                        case "fold":
-                            if isinstance(sel_phone, p.FoldablePhone):
-                                sel_phone.fold()
-                        case "del":
-                            if isinstance(sel_phone, p.Smartphone):
-                                sel_phone.uninstall_app(args[0])
-                        case _:
-                            print("Invalid command")
-            else:
-                print("Invalid index")
-        #deleting a phone
-        case "del":
-            del_seq = []
-            for i in range(len(args)):
-                ind = int(args[i])-1
-                if 0 <= ind < len(phones) and not ind in del_seq:
-                    del_seq.append(ind)
-            del_seq.sort(reverse=True)
-            for i in del_seq:
-                phones.pop(i)
-        #clearing all
+                                bank.add(ProtectedATM(name))
+                case "card":
+                    user_input = input("enter card number, pin code and amount of money: [number] [pin] [money_amount]\n")
+                    if len(user_input.split()) != 3:
+                        raise ValueError("Incorrect number of arguments!")
+                    number = int(user_input.split()[0])
+                    pin = int(user_input.split()[1])
+                    money = int(user_input.split()[2])
+
+                    card_list.append(CreditCard(number, pin, money))
+                case "coll":
+                    user_input = input("enter collector name and bill amount, [name] [1000_uah_bills] [500_uah_bills] [200_uah_bills] [100_uah_bills] [50_uah_bills]\n")
+                    if len(user_input.split()) not in [6]:
+                        raise ValueError("Incorrect number of arguments!")
+                    bills = []
+                    for i in user_input.split()[1:]:
+                        bills.append(int(i))
+                    name = user_input.split()[0]
+                    collector_list.append(Collector(name, bills))
+            pass
+        case "rm":
+            if len(args) != 2:
+                raise ValueError("Incorrect number of arguments!")
+            match args[0]:
+                case "atm":
+                    del bank[int(args[1]) - 1]
+                case "coll":
+                    del collector_list[int(args[1])-1]
+                case "card":
+                    del card_list[int(args[1])-1]
+        case "wdraw":
+            if len(args) != 2:
+                raise ValueError("Incorrect number of arguments!")
+            bank[int(args[0]) - 1].get_bills(card_list[int(args[1]) - 1])
+        case "repl":
+            if len(args) != 2:
+                raise ValueError("Incorrect number of arguments!")
+            bank[int(args[0]) - 1].get_replenished(collector_list[int(args[1]) - 1])
+        case "inf":
+            bank.info()
+        case "set":
+            if len(args) != 6:
+                raise ValueError("Incorrect number of arguments!")
+            bills = []
+            for i in args[1:]:
+                bills.append(int(i))
+            collector_list[int(args[0])-1].bills = bills
         case "clear":
-            phones.clear()
-            print("Phones cleared successfully")
-        #exit
+            bank = Bank()
+            card_list = []
+            collector_list = []
         case "exit":
             break
-        case "test":
-            phones.append(p.ButtonPhone(1000,'Nokia','NokiaOS'))
-            phones.append(p.Smartphone(3000,'Xiaomi A15','MIUI'))
-            phones.append(p.FoldablePhone(3500,'Galaxy Fold Z 6','OneUI','horizontal'))
         case _:
-            print("No such command!")
+            print("Error! Unknown command!")
