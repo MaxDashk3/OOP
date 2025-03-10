@@ -47,8 +47,43 @@ class ATM(metaclass=ABCMeta):
             self._blocked = False
 
     @abstractmethod
-    def get_bills(self, card: CreditCard):
+    def authenticate(self, card):
         pass
+
+
+    def get_bills(self, card: CreditCard):
+        if self._blocked:
+            print("ATM blocked!!!")
+            return
+        print(f"Hello from {self.name}! Welcome!")
+
+        if not self.authenticate(card):
+            return
+
+        print("Available amount: ", card.money)
+        amount = int(input("Enter amount to withdraw: "))
+        if card.money < amount:
+            print("Not enough money on card")
+            return
+
+        withdraw_bills = self._calculate_bills(amount)
+        could_withdraw = self._get_bill_sum(withdraw_bills)
+        if could_withdraw != amount:
+            choice = input(f"Couldn't withdraw {amount}, withdraw {could_withdraw} instead? y/n: ")
+            if choice not in ['y', 'Y']:
+                print("Withdraw cancelled!")
+                return
+        card.money -= could_withdraw
+        print("Withdraw successful!")
+        print("Your bills:")
+        new_bills = []
+        for i in range(len(withdraw_bills)):
+            if withdraw_bills[i] != 0:
+                print(f"{withdraw_bills[i]} bills for {self._bill_numbers[i]}")
+
+            new_bills.append(self.bills[i] - withdraw_bills[i])
+        self.bills = new_bills
+        print()
 
     def _calculate_bills(self, number):
         return_bills = []
@@ -84,54 +119,24 @@ class ATM(metaclass=ABCMeta):
         return return_str
 
 class BasicATM(ATM):
-    def get_bills(self, card: CreditCard):
-        if self._blocked:
-            print("ATM blocked!!!")
-            return
-        print(f"Hello from {self.name}! Welcome!")
+
+    def authenticate(self, card):
         pin = int(input("Enter pincode: "))
         if pin != card.get_pin():
             print("Wrong pin!!!")
-            return
-        print("Available amount: ",card.money)
-        amount = int(input("Enter amount to withdraw: "))
-        if card.money < amount:
-            print("Not enough money on card")
-            return
-
-        withdraw_bills = self._calculate_bills(amount)
-        could_withdraw = self._get_bill_sum(withdraw_bills)
-        if could_withdraw != amount:
-            choice = input(f"Couldn't withdraw {amount}, withdraw {could_withdraw} instead? y/n: ")
-            if choice not in ['y', 'Y']:
-                print("Withdraw cancelled!")
-                return
-        card.money -= could_withdraw
-        print ("Withdraw successful!")
-        print ("Your bills:")
-        new_bills = []
-        for i in range(len(withdraw_bills)):
-            if withdraw_bills[i] != 0:
-                print(f"{withdraw_bills[i]} bills for {self._bill_numbers[i]}")
-
-            new_bills.append(self.bills[i] - withdraw_bills[i])
-        self.bills = new_bills
-        print()
+            return False
+        else: return True
 
     def __str__(self):
         return super().__str__() + ", type: Basic ATM"
 
 
 class ProtectedATM(ATM):
-    def get_bills(self, card: CreditCard):
-        if self._blocked:
-            print("ATM blocked!!!")
-            return
-        print(f"Hello from {self.name}! Welcome to the protected ATM!")
+    def authenticate(self, card):
         pin = int(input("Enter pincode: "))
         if pin != card.get_pin():
             print("Wrong pin!!!")
-            return
+            return False
 
         print("Enter the code from SMS")
         sms_code = ProtectedATM.__generate_code()
@@ -143,31 +148,9 @@ class ProtectedATM(ATM):
             if sms_code_input != sms_code:
                 self._blocked = True
                 print("ATM blocked!!!")
-                return
-        print("Available amount: ",card.money)
-        amount = int(input("Enter amount to withdraw: "))
-        if card.money < amount:
-            print("Not enough money on card")
-            return
+                return False
 
-        withdraw_bills = self._calculate_bills(amount)
-        could_withdraw = self._get_bill_sum(withdraw_bills)
-        if could_withdraw != amount:
-            choice = input(f"Couldn't withdraw {amount}, withdraw {could_withdraw} instead? y/n: ")
-            if choice not in ['y', 'Y']:
-                print("Withdraw cancelled!")
-                return
-        card.money -= could_withdraw
-        print ("Withdraw successful!")
-        print ("Your bills:")
-        new_bills = []
-        for i in range(len(withdraw_bills)):
-            if withdraw_bills[i] != 0:
-                print(f"{withdraw_bills[i]} bills for {self._bill_numbers[i]}")
-
-            new_bills.append(self.bills[i] - withdraw_bills[i])
-        self.bills = new_bills
-        print()
+        return True
 
     @staticmethod
     def __generate_code():
@@ -197,8 +180,9 @@ class Bank(Sequence):
         del self._ATMs[key]
 
     def __iter__(self):
-        for i in self._ATMs:
-            yield i
+        # for i in self._ATMs:
+        #     yield i
+        return iter(self._ATMs)
 
     def add(self, other):
         if isinstance(other, list):
