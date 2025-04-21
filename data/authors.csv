@@ -1,0 +1,5 @@
+id,name,surname,patronymic,is_resident
+4,Alex,Blue,Blueson,False
+1,Anatolyi,Canada,Test,False
+2,Anna,Gray,Jackson,True
+3,Megan,Green,Johnson,True

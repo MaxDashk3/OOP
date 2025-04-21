@@ -1,0 +1,7 @@
+id,title,author_part_dict
+4,CoolMovie,{3: 100}
+5,the creature feature featuring the creature,{2: 100}
+3,SuperCool,{2: 100}
+6,The feature creature 2,"{3: 10, 4: 90}"
+2,WOW2Title,"{1: 40, 2: 60}"
+1,WOWTitle,{1: 100}
