@@ -10,9 +10,9 @@ def to_csv_all(path_to_folder: str, creations: CreationRegistry, authors: Author
 
 def to_json_all(path_to_folder: str, creations: CreationRegistry, authors: AuthorRegistry, companies: CompanyRegistry) -> None:
     os.makedirs(path_to_folder, exist_ok=True)
-    creations.to_json(os.path.join(path_to_folder, "creations.csv"))
-    authors.to_json(os.path.join(path_to_folder, "authors.csv"))
-    companies.to_json(os.path.join(path_to_folder, "companies.csv"))
+    creations.to_json(os.path.join(path_to_folder, "creations.json"))
+    authors.to_json(os.path.join(path_to_folder, "authors.json"))
+    companies.to_json(os.path.join(path_to_folder, "companies.json"))
 
 def from_csv_all(path_to_folder: str):
     #returns list of 3 registries in the following order: creations, authors, companies
